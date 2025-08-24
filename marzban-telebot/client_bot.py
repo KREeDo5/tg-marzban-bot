@@ -45,14 +45,27 @@ class ClientBot:
 
     async def server_status(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Статус сервера для клиентов"""
-        status_data = self.api.get_server_status()
-        message = get_server_status_message(status_data)
+        telegram_id = update.effective_user.id
+        telegram_name = update.effective_user.username
+        user_data = self.api.get_user(telegram_id, telegram_name)
+        if not user_data:
+            await update.message.reply_text(
+                MESSAGES['user_not_found'],
+            )
+            return
+        message = get_server_status_message(user_data)
         await update.message.reply_text(message, parse_mode='HTML')
 
     async def subscription_info(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Информация о подписке"""
-        user_id = update.effective_user.id
-        user_data = self.api.get_user(user_id)
+        telegram_id = update.effective_user.id
+        telegram_name = update.effective_user.username
+        user_data = self.api.get_user(telegram_id, telegram_name)
+        if not user_data:
+            await update.message.reply_text(
+                MESSAGES['user_not_found'],
+            )
+            return
         message = get_subscription_message(user_data)
         await update.message.reply_text(message, parse_mode='HTML')
 
