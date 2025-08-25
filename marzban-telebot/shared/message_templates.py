@@ -2,19 +2,85 @@ from datetime import datetime
 """
 Шаблоны сообщений для бота
 """
+def get_configs_message(user_data):
+    if not user_data or 'proxies' not in user_data:
+        return "❌ Конфигурации не найдены"
 
-def get_server_status_message(status_data):
-    """Шаблон сообщения со статусом сервера"""
-    return (
-        f"📊 <b>Статус сервера</b>\n\n"
-        f"🖥️ CPU: {status_data.get('cpu_usage', 0)}%\n"
-        f"💾 Память: {status_data.get('memory_usage', 0)}%\n"
-        f"📶 Трафик за всё время: {status_data.get('network_usage', 'N/A')}\n"
-        f"📶 Трафик за месяц: {status_data.get('monthly_usage', 'N/A')}\n"
-        f"👥 Пользователей: {status_data.get('total_users', 0)}\n"
-        f"⚡ Активных: {status_data.get('active_users', 0)}\n"
-        f"⏰ Аптайм: {status_data.get('uptime', 'N/A')}"
-    )
+    proxies = user_data.get('proxies', {})
+    inbounds = user_data.get('inbounds', {})
+    links = user_data.get('links', [])
+
+    message = "🇫🇮 <b>Ваши конфигурации:</b>\n\n"
+
+    # Протоколы с их emoji
+    protocol_emojis = {
+        'vless': '🚀',
+        'vmess': '🟢',
+        'shadowsocks': '🌀',
+        'trojan': '🟠',
+    }
+
+    # Выводим каждый протокол
+    for protocol, config in proxies.items():
+        if protocol in inbounds and inbounds[protocol]:
+            emoji = protocol_emojis.get(protocol, '🔹')
+            message += f"{emoji} <b>{protocol.upper()}</b>\n"
+
+            # Детали конфигурации
+            if protocol == 'vless':
+                message += f"   └ UUID: <code>{config.get('id')}</code>\n"
+                if config.get('flow'):
+                    message += f"   └ Flow: <code>{config.get('flow')}</code>\n"
+
+            elif protocol == 'shadowsocks':
+                message += f"   └ Метод: <code>{config.get('method')}</code>\n"
+                message += f"   └ Пароль: <code>{config.get('password')}</code>\n"
+
+            message += f"   └ Порт: <code>{get_port_from_links(links, protocol)}</code>\n"
+            message += f"   └ Inbounds: {', '.join(inbounds[protocol])}\n\n"
+
+    # Конфиги для копирования
+    if links:
+        message += "📎 <b>Конфигурации для быстрой настройки клиента:</b>\n\n"
+        for i, link in enumerate(links, 1):
+            # Определяем тип протокола по конфигу
+            protocol_type = get_protocol_from_link(link)
+            emoji = protocol_emojis.get(protocol_type, '🔗')
+            message += f"{emoji} <code>{link}</code>\n\n"
+        message += "<i>Нажмите на ссылку для копирования и вставьте в поддерживаемый клиент</i>\n\n"
+
+    # # QR код и подписка
+    # subscription_url = user_data.get('subscription_url')
+    # if subscription_url:
+    #     full_sub_url = f"https://your-domain.com{subscription_url}"
+    #     message += f"📡 <b>Подписка:</b>\n<code>{full_sub_url}</code>\n\n"
+
+    return message
+
+def get_protocol_from_link(link):
+    """Определяет протокол по ссылке"""
+    if link.startswith('vless://'):
+        return 'vless'
+    elif link.startswith('vmess://'):
+        return 'vmess'
+    elif link.startswith('ss://'):
+        return 'shadowsocks'
+    elif link.startswith('trojan://'):
+        return 'trojan'
+    return 'unknown'
+
+def get_port_from_links(links, protocol):
+    """Извлекает порт из ссылок"""
+    for link in links:
+        if get_protocol_from_link(link) == protocol:
+            try:
+                # Парсим порт из URL
+                import urllib.parse
+                parsed = urllib.parse.urlparse(link)
+                return parsed.port or 'N/A'
+            except:
+                return 'N/A'
+    return 'N/A'
 
 def get_subscription_message(user_data):
     """Шаблон сообщения с информацией о подписке"""

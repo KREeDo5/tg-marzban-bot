@@ -14,7 +14,7 @@ from .config import (
 
 from .marzban_api import MarzbanAPI
 from .keyboards import get_client_keyboard, get_admin_keyboard
-from .message_templates import get_server_status_message, get_subscription_message, get_commands_message
+from .message_templates import get_configs_message, get_subscription_message, get_commands_message
 
 # Можно указать что импортируется при from shared import *
 __all__ = [
@@ -28,7 +28,7 @@ __all__ = [
     'MarzbanAPI',
     'get_client_keyboard',
     'get_admin_keyboard',
-    'get_server_status_message',
+    'get_configs_message',
     'get_subscription_message',
     'get_commands_message'
 ]

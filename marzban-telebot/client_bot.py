@@ -9,7 +9,7 @@ from shared import (
     MESSAGES,
     MarzbanAPI,
     get_client_keyboard,
-    get_server_status_message,
+    get_configs_message,
     get_subscription_message,
     get_commands_message
 )
@@ -73,7 +73,8 @@ class ClientBot:
         if success:
             # Обновляем сообщение об успехе
             await update.message.reply_text(
-                f"✅ {message}\n\n"
+                f"✅ {message}\n\n",
+                reply_markup=ReplyKeyboardMarkup(get_client_keyboard(), resize_keyboard=True)
             )
             await self.subscription_info(update, context)
         else:
@@ -106,7 +107,7 @@ class ClientBot:
                 MESSAGES['user_not_found'],
             )
             return
-        message = get_server_status_message(user_data)
+        message = get_configs_message(user_data)
         await update.message.reply_text(message, parse_mode='HTML')
 
     def setup_handlers(self):

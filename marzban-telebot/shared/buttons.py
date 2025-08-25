@@ -1,5 +1,5 @@
 # Кнопки для клиента
-CLIENT_BUTTON_CONFIGS = 'Мои конфиги'
+CLIENT_BUTTON_CONFIGS = '🔧 Мои конфиги'
 CLIENT_BUTTON_SUBSCRIPTION = '📋 Моя подписка'
 CLIENT_BUTTON_COMMANDS = 'Доступные команды'
 CLIENT_BUTTON_RESTART = '🔄 Перезапустить бота'
