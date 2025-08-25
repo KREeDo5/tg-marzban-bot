@@ -46,6 +46,14 @@ class ClientBot:
         self.setup_handlers()
         self.setup_jobs()  # Настраиваем задачи после инициализации
 
+    def setup_handlers(self):
+        self.application.add_handler(CommandHandler("start", self.start))
+        self.application.add_handler(CommandHandler("restart", self.restart_bot))
+        self.application.add_handler(CommandHandler("my_configs", self.user_configs))
+        self.application.add_handler(CommandHandler("my_info", self.subscription_info))
+        self.application.add_handler(CommandHandler("reset_traffic", self.reset_traffic))
+        self.application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_text))
+
     def setup_jobs(self):
         """Настройка фоновых задач"""
         # Проверка рассылок каждые 30 секунд
@@ -63,6 +71,13 @@ class ClientBot:
             name="cleanup_broadcasts"
         )
 
+    async def cleanup_old_broadcasts(self, context: ContextTypes.DEFAULT_TYPE):
+        try:
+            broadcast_manager.cleanup_old_broadcasts(days=1)
+            print("✅ Очистка старых рассылок завершена")
+        except Exception as e:
+            print(f"❌ Ошибка очистки рассылок: {e}")
+
     async def show_commands(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Показать доступные команды"""
         await update.message.reply_text(get_commands_message(), parse_mode='HTML')
@@ -77,21 +92,16 @@ class ClientBot:
                 MESSAGES['user_not_found'],
             )
             return
-
         username = user_data.get('username')
-
         # Отправляем сообщение о начале сброса
         reset_message = await update.message.reply_text(
             "🔄 Сбрасываем трафик...",
             reply_markup=ReplyKeyboardRemove()
         )
-
         # Сохраняем ID сообщения для последующего обновления
         context.chat_data['last_reset_message_id'] = reset_message
-
         # Выполняем сброс трафика
         success, message = self.api.reset_user_traffic(username)
-
         if success:
             # Обновляем сообщение об успехе
             await update.message.reply_text(
@@ -132,14 +142,6 @@ class ClientBot:
         message = get_configs_message(user_data)
         await update.message.reply_text(message, parse_mode='HTML')
 
-    def setup_handlers(self):
-        self.application.add_handler(CommandHandler("start", self.start))
-        self.application.add_handler(CommandHandler("restart", self.restart_bot))
-        self.application.add_handler(CommandHandler("my_configs", self.user_configs))
-        self.application.add_handler(CommandHandler("my_info", self.subscription_info))
-        self.application.add_handler(CommandHandler("reset_traffic", self.reset_traffic))
-        self.application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_text))
-
     async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         first_name = update.effective_user.first_name
         welcome_text = f"👋 Добро пожаловать, {first_name}!\n\nИспользуй меню для получения информации."
@@ -156,7 +158,6 @@ class ClientBot:
 
     async def handle_text(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         text = update.message.text
-
         await {
             CLIENT_BUTTON_CONFIGS: self.user_configs,
             CLIENT_BUTTON_SUBSCRIPTION: self.subscription_info,
@@ -164,7 +165,6 @@ class ClientBot:
             BUTTON_RESTART: self.restart_bot,
             CLIENT_TRAFFIC_RESET: self.reset_traffic,
         }.get(text, lambda u, c: u.message.reply_text(MESSAGES['unknown_command']))(update, context)
-
 
     async def check_broadcasts(self, context: ContextTypes.DEFAULT_TYPE):
         """Фоновая задача проверки новых рассылок"""
@@ -231,23 +231,6 @@ class ClientBot:
         except Exception as e:
             print(f"❌ Критическая ошибка доставки рассылки: {e}")
             return 0
-
-    def setup_handlers(self):
-        self.application.add_handler(CommandHandler("start", self.start))
-        self.application.add_handler(CommandHandler("restart", self.restart_bot))
-        self.application.add_handler(CommandHandler("my_configs", self.user_configs))
-        self.application.add_handler(CommandHandler("my_info", self.subscription_info))
-        self.application.add_handler(CommandHandler("reset_traffic", self.reset_traffic))
-        self.application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_text))
-
-    async def cleanup_old_broadcasts(self, context: ContextTypes.DEFAULT_TYPE):
-        """Очистка старых рассылок"""
-        try:
-            broadcast_manager.cleanup_old_broadcasts(days=1)
-            print("✅ Очистка старых рассылок завершена")
-        except Exception as e:
-            print(f"❌ Ошибка очистки рассылок: {e}")
-
 
 def main():
     """Запуск клиентского бота"""
