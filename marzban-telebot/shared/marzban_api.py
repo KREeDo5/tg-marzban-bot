@@ -13,7 +13,6 @@ class MarzbanAPI:
         self.token = self._get_token()
 
     def _get_token(self):
-        """Получение токена аутентификации"""
         try:
             response = requests.post(
                 f"{self.base_url}/api/admin/token",
@@ -60,7 +59,7 @@ class MarzbanAPI:
                 self.token = self._get_token()
             headers = {"Authorization": f"Bearer {self.token}"}
             response = requests.get(
-                f"{self.base_url}/api/system/status",
+                f"{self.base_url}/api/system",
                 headers=headers,
                 timeout=10
             )
@@ -84,13 +83,20 @@ class MarzbanAPI:
         """Извлечение данных из поля Note"""
         if not note_text:
             return {}
+
         data = {}
+
+        # Ищем telegram_id:123456789
         tg_id_match = re.search(r'telegram_id:(\d+)', note_text)
         if tg_id_match:
             data['telegram_id'] = int(tg_id_match.group(1))
+
+        # Ищем telegram_name:@username
         tg_name_match = re.search(r'telegram_name:@([a-zA-Z0-9_]+)', note_text)
         if tg_name_match:
             data['telegram_name'] = tg_name_match.group(1)
+
+        # Ищем month_price:400
         price_match = re.search(r'month_price:(\d+)', note_text)
         if price_match:
             data['month_price'] = int(price_match.group(1))

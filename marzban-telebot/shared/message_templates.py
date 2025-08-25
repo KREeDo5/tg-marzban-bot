@@ -22,12 +22,12 @@ def get_subscription_message(user_data):
     formatted_created_date = format_date(created_at, default="Дата отсутствует")
     expire_date = user_data.get('expire', 'Не ограничено')
     formatted_expire_date = format_date(expire_date)
+    time_until_expiry = get_time_until_expiry(expire_date)
 
     used_traffic = user_data.get('used_traffic', 0)
     formatted_traffic = format_traffic(used_traffic)
 
     fulltime_used_traffic = user_data.get('lifetime_used_traffic', 0)
-    print(f"Fulltime used traffic: {fulltime_used_traffic}")
     formatted_fulltime_traffic = format_traffic(fulltime_used_traffic)
 
     message = (
@@ -41,6 +41,7 @@ def get_subscription_message(user_data):
         f"- Всего: {formatted_fulltime_traffic}\n\n"
 
         f"Подписка доступна до:\n📅 {formatted_expire_date}"
+        f"\n{time_until_expiry}"
     )
 
     # Добавляем лимит, если он есть
@@ -49,6 +50,7 @@ def get_subscription_message(user_data):
         message += f"\n📈 Лимит: {format_traffic(data_limit)}"
 
     # Добавляем информацию о стоимости, если есть
+    print(f"Month price: {user_data.get('month_price')}")
     month_price = user_data.get('month_price')
     if month_price:
         message += f"\n\n💳 Стоимость: {month_price} руб./месяц"
@@ -128,3 +130,58 @@ def format_date(date_str, default="Не ограничено"):
             return default
     except (ValueError, TypeError):
         return default
+
+def get_time_until_expiry(expire_date_str):
+    """Вычисляет оставшееся время до истечения подписки"""
+    if not expire_date_str or expire_date_str == 'Не ограничено':
+        return "Неограниченный доступ"
+
+    try:
+        # Определяем тип данных и парсим дату истечения
+        if isinstance(expire_date_str, int):  # Если это timestamp
+            expire_date = datetime.fromtimestamp(expire_date_str)
+        elif isinstance(expire_date_str, str):  # Если это строка
+            if 'T' in expire_date_str:
+                expire_date = datetime.fromisoformat(expire_date_str.replace('Z', ''))
+            else:
+                expire_date = datetime.strptime(expire_date_str, "%Y-%m-%d")
+        else:
+            raise ValueError("Неподдерживаемый формат даты")
+
+        current_date = datetime.now()
+
+        print(f"❌❌❌ current_date: {current_date} ❌❌❌")
+
+        # Если подписка уже истекла
+        if expire_date < current_date:
+            days_passed = (current_date - expire_date).days
+            return f"❌ Истекла {days_passed} дней назад"
+
+        # Вычисляем оставшееся время
+        time_left = expire_date - current_date
+        days_left = time_left.days
+        hours_left = time_left.seconds // 3600
+
+        # Форматируем вывод
+        if days_left >= 30:
+            months = days_left // 30
+            days = days_left % 30
+            if months == 1:
+                return f"⏳ Истекает через: {months} месяц {days} дней"
+            elif months in [2, 3, 4]:
+                return f"⏳ Истекает через: {months} месяца {days} дней"
+            else:
+                return f"⏳ Истекает через: {months} месяцев {days} дней"
+        elif days_left > 0:
+            if days_left in [1, 21, 31]:
+                return f"⏳ Истекает через: {days_left} день"
+            elif days_left in [2, 3, 4, 22, 23, 24]:
+                return f"⏳ Истекает через: {days_left} дня"
+            else:
+                return f"⏳ Истекает через: {days_left} дней"
+        else:
+            return f"⏳ Истекает сегодня ({hours_left} часов осталось)"
+
+    except Exception as e:
+        print(f"Ошибка вычисления времени: {e}")
+        return "Неизвестно"
