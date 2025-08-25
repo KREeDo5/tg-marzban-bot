@@ -75,6 +75,34 @@ class MarzbanAPI:
             data['month_price'] = int(price_match.group(1))
         return data
 
+    def reset_user_traffic(self, username):
+        """Сброс трафика пользователя через Marzban API"""
+        try:
+            if not self.token:
+                self.token = self._get_token()
+
+            headers = {
+                "Authorization": f"Bearer {self.token}",
+                "Content-Type": "application/json"
+            }
+
+            response = requests.post(
+                f"{self.base_url}/api/user/{username}/reset",
+                headers=headers,
+                timeout=10
+            )
+
+            if response.status_code == 200:
+                return True, "Трафик успешно сброшен"
+            else:
+                error_msg = response.json().get('detail', 'Неизвестная ошибка')
+                return False, f"Ошибка: {error_msg}"
+
+        except Exception as e:
+            print(f"⚠️ Ошибка сброса трафика: {e}")
+            return False, f"Ошибка подключения: {e}"
+
+#АДМИНСКИЕ
 
     # def get_server_status(self):
     #     """Получение статуса сервера"""
@@ -103,29 +131,22 @@ class MarzbanAPI:
     #         print(f"⚠️ Ошибка получения статуса сервера: {e}")
     #         return {}
 
-    def reset_user_traffic(self, username):
-        """Сброс трафика пользователя через Marzban API"""
+    def get_all_users(self):
+        """Получение списка всех пользователей"""
         try:
             if not self.token:
                 self.token = self._get_token()
 
-            headers = {
-                "Authorization": f"Bearer {self.token}",
-                "Content-Type": "application/json"
-            }
-
-            response = requests.post(
-                f"{self.base_url}/api/user/{username}/reset",
+            headers = {"Authorization": f"Bearer {self.token}"}
+            response = requests.get(
+                f"{self.base_url}/api/users",
                 headers=headers,
-                timeout=10
+                timeout=30  # Увеличиваем таймаут для большого количества пользователей
             )
+            response.raise_for_status()
 
-            if response.status_code == 200:
-                return True, "Трафик успешно сброшен"
-            else:
-                error_msg = response.json().get('detail', 'Неизвестная ошибка')
-                return False, f"Ошибка: {error_msg}"
+            return response.json().get('users', [])
 
         except Exception as e:
-            print(f"⚠️ Ошибка сброса трафика: {e}")
-            return False, f"Ошибка подключения: {e}"
+            print(f"⚠️ Ошибка получения списка пользователей: {e}")
+            return []

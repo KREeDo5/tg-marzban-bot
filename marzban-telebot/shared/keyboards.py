@@ -3,11 +3,8 @@ from shared.buttons import (
     CLIENT_BUTTON_SUBSCRIPTION,
     CLIENT_TRAFFIC_RESET,
     CLIENT_BUTTON_COMMANDS,
-    CLIENT_BUTTON_RESTART,
-    ADMIN_BUTTON_STATUS,
-    ADMIN_BUTTON_USERS,
     ADMIN_BUTTON_BROADCAST,
-    ADMIN_BUTTON_HELP
+    BUTTON_RESTART,
 )
 
 def get_client_keyboard():
@@ -15,12 +12,12 @@ def get_client_keyboard():
     return [
         [CLIENT_BUTTON_CONFIGS, CLIENT_BUTTON_SUBSCRIPTION],
         [CLIENT_TRAFFIC_RESET, CLIENT_BUTTON_COMMANDS],
-        [CLIENT_BUTTON_RESTART]
+        [BUTTON_RESTART]
     ]
 
 def get_admin_keyboard():
     """Клавиатура для администратора"""
     return [
-        [ADMIN_BUTTON_STATUS, ADMIN_BUTTON_USERS],
-        [ADMIN_BUTTON_BROADCAST, ADMIN_BUTTON_HELP]
+        [ADMIN_BUTTON_BROADCAST],
+        [BUTTON_RESTART]
     ]
