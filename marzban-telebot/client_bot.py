@@ -74,12 +74,7 @@ class ClientBot:
             # Обновляем сообщение об успехе
             await update.message.reply_text(
                 f"✅ {message}\n\n"
-                f"Трафик пользователя {username} был сброшен.",
-                reply_markup=ReplyKeyboardMarkup(get_client_keyboard(), resize_keyboard=True)
             )
-
-            # Показываем обновленную информацию о подписке
-            await asyncio.sleep(1)
             await self.subscription_info(update, context)
         else:
             # Обновляем сообщение об ошибке
