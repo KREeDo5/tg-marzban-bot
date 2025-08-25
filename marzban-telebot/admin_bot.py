@@ -24,7 +24,7 @@ class AdminBot:
         """Только админские команды"""
         self.application.add_handler(CommandHandler("start", self.start))
         self.application.add_handler(CommandHandler("users", self.list_users))
-        self.application.add_handler(CommandHandler("status", self.server_status))
+        # self.application.add_handler(CommandHandler("status", self.server_status))
         self.application.add_handler(CommandHandler("broadcast", self.broadcast_start))
         
         conv_handler = ConversationHandler(
@@ -134,9 +134,9 @@ class AdminBot:
         
         text = update.message.text
         
-        if text == '📊 Статус сервера':
-            await self.server_status(update, context)
-        elif text == '👥 Все пользователи':
+        # if text == '📊 Статус сервера':
+        #     await self.server_status(update, context)
+        if text == '👥 Все пользователи':
             await self.list_users(update, context)
         elif text == '📢 Рассылка':
             await self.broadcast_start(update, context)

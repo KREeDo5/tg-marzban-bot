@@ -1,6 +1,7 @@
 from shared.buttons import (
-    CLIENT_BUTTON_STATUS,
+    CLIENT_BUTTON_CONFIGS,
     CLIENT_BUTTON_SUBSCRIPTION,
+    CLIENT_TRAFFIC_RESET,
     CLIENT_BUTTON_COMMANDS,
     CLIENT_BUTTON_RESTART,
     ADMIN_BUTTON_STATUS,
@@ -12,9 +13,8 @@ from shared.buttons import (
 def get_client_keyboard():
     """Клавиатура для клиентов"""
     return [
-        # [CLIENT_BUTTON_STATUS, CLIENT_BUTTON_SUBSCRIPTION],
-        # [CLIENT_BUTTON_COMMANDS],
-        [CLIENT_BUTTON_SUBSCRIPTION],
+        [CLIENT_BUTTON_CONFIGS, CLIENT_BUTTON_SUBSCRIPTION],
+        [CLIENT_TRAFFIC_RESET, CLIENT_BUTTON_COMMANDS],
         [CLIENT_BUTTON_RESTART]
     ]
 

@@ -52,33 +52,6 @@ class MarzbanAPI:
             print(f"⚠️ Ошибка поиска пользователя: {e}")
             return None
 
-    def get_server_status(self):
-        """Получение статуса сервера"""
-        try:
-            if not self.token:
-                self.token = self._get_token()
-            headers = {"Authorization": f"Bearer {self.token}"}
-            response = requests.get(
-                f"{self.base_url}/api/system",
-                headers=headers,
-                timeout=10
-            )
-            response.raise_for_status()
-
-            data = response.json()
-            return {
-                'cpu_usage': data.get('cpu_percent', 0),
-                'memory_usage': data.get('memory_percent', 0),
-                'network_usage': data.get('total_network', '0 GB'),
-                'monthly_usage': data.get('monthly_network', '0 GB'),
-                'total_users': data.get('total_users', 0),
-                'active_users': data.get('active_users', 0),
-                'uptime': data.get('uptime', '0 дней')
-            }
-        except Exception as e:
-            print(f"⚠️ Ошибка получения статуса сервера: {e}")
-            return {}
-
     def extract_data_from_note(self, note_text):
         """Извлечение данных из поля Note"""
         if not note_text:
@@ -101,3 +74,58 @@ class MarzbanAPI:
         if price_match:
             data['month_price'] = int(price_match.group(1))
         return data
+
+
+    # def get_server_status(self):
+    #     """Получение статуса сервера"""
+    #     try:
+    #         if not self.token:
+    #             self.token = self._get_token()
+    #         headers = {"Authorization": f"Bearer {self.token}"}
+    #         response = requests.get(
+    #             f"{self.base_url}/api/system",
+    #             headers=headers,
+    #             timeout=10
+    #         )
+    #         response.raise_for_status()
+
+    #         data = response.json()
+    #         return {
+    #             'cpu_usage': data.get('cpu_percent', 0),
+    #             'memory_usage': data.get('memory_percent', 0),
+    #             'network_usage': data.get('total_network', '0 GB'),
+    #             'monthly_usage': data.get('monthly_network', '0 GB'),
+    #             'total_users': data.get('total_users', 0),
+    #             'active_users': data.get('active_users', 0),
+    #             'uptime': data.get('uptime', '0 дней')
+    #         }
+    #     except Exception as e:
+    #         print(f"⚠️ Ошибка получения статуса сервера: {e}")
+    #         return {}
+
+    def reset_user_traffic(self, username):
+        """Сброс трафика пользователя через Marzban API"""
+        try:
+            if not self.token:
+                self.token = self._get_token()
+
+            headers = {
+                "Authorization": f"Bearer {self.token}",
+                "Content-Type": "application/json"
+            }
+
+            response = requests.post(
+                f"{self.base_url}/api/user/{username}/reset",
+                headers=headers,
+                timeout=10
+            )
+
+            if response.status_code == 200:
+                return True, "Трафик успешно сброшен"
+            else:
+                error_msg = response.json().get('detail', 'Неизвестная ошибка')
+                return False, f"Ошибка: {error_msg}"
+
+        except Exception as e:
+            print(f"⚠️ Ошибка сброса трафика: {e}")
+            return False, f"Ошибка подключения: {e}"
