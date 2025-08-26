@@ -56,10 +56,10 @@ class ClientBot:
 
     def setup_jobs(self):
         """Настройка фоновых задач"""
-        # Проверка рассылок каждые 30 секунд
+        # Проверка рассылок каждые 120 секунд
         self.application.job_queue.run_repeating(
             self.check_broadcasts,
-            interval=30.0,
+            interval=120.0,
             first=10.0,
             name="check_broadcasts"
         )
