@@ -2,16 +2,17 @@ services:
   # Сервис для админ-бота
   admin-bot:
     build:
-      context: ./marzban-telebot  # Используем текущую директорию
-      dockerfile: ../Dockerfile.admin  # Указываем какой Dockerfile использовать
-    container_name: marzban-admin-bot  # Имя контейнера
-    restart: unless-stopped  # Автоперезапуск при падении
+      context: ./marzban-telebot # Используем текущую директорию
+      dockerfile: ../Dockerfile.admin # Указываем какой Dockerfile использовать
+    container_name: marzban-admin-bot # Имя контейнера
+    restart: unless-stopped # Автоперезапуск при падении
     environment:
       - TZ=Europe/Moscow
     volumes:
-      - broadcast-data:/app/broadcasts  # Общая папка для рассылок
+      - broadcast-data:/app/broadcasts # Общая папка для рассылок
     env_file:
-      - ./marzban-telebot/.env  # Используем переменные из .env файла
+      - ./marzban-telebot/.env # Используем переменные из .env файла
+    #network_mode: "host"  раскомментировать при необходимости
 
   # Сервис для клиент-бота
   client-bot:
@@ -23,12 +24,13 @@ services:
     environment:
       - TZ=Europe/Moscow
     volumes:
-      - broadcast-data:/app/broadcasts  # Та же папка что и у admin-bot
+      - broadcast-data:/app/broadcasts # Та же папка что и у admin-bot
     env_file:
       - ./marzban-telebot/.env
     depends_on:
-      - admin-bot  # Запускается после admin-bot
+      - admin-bot # Запускается после admin-bot
+    #network_mode: "host"  раскомментировать при необходимости
 
 # Определяем volumes (тома данных)
 volumes:
-  broadcast-data:  # Именованный volume для рассылок
+  broadcast-data: # Именованный volume для рассылок
